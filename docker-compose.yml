@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+  app:
+    image: jc21/nginx-proxy-manager:latest
+    restart: always
+    environment:
+      DB_MYSQL_HOST: db
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: ${MYSQL_USER}
+      DB_MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      DB_MYSQL_NAME: ${MYSQL_DATABASE}
+    volumes:
+      - ${BASE_VOLUME}/data:/app/data
+      - ${BASE_VOLUME}/letsencrypt:/app/letsencrypt
+      - ${BASE_VOLUME}/nginx:/app/nginx
+    ports:
+      - 80:80
+      - 81:81
+      - 443:443
+    networks:
+      - internal
+      - nginx
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:81/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 16M
+  db:
+    image: mariadb:11
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - ${BASE_VOLUME}/mysql:/var/lib/mysql
+    expose:
+      - 3306
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 32M
+
+networks:
+  internal:
+  nginx:
+    external: true
