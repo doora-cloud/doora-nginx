@@ -25,10 +25,9 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:81/"]
+      test: ["CMD", "/usr/bin/check-health"]
       interval: 10s
-      timeout: 5s
-      retries: 3
+      timeout: 3s
     deploy:
       resources:
         limits:
