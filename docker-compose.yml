@@ -11,9 +11,8 @@ services:
       DB_MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       DB_MYSQL_NAME: ${MYSQL_DATABASE}
     volumes:
-      - ${BASE_VOLUME}/data:/app/data
-      - ${BASE_VOLUME}/letsencrypt:/app/letsencrypt
-      - ${BASE_VOLUME}/nginx:/app/nginx
+      - ${BASE_VOLUME}/data:/data
+      - ${BASE_VOLUME}/letsencrypt:/etc/letsencrypt
     ports:
       - 80:80
       - 81:81
